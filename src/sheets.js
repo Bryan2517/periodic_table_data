@@ -1,5 +1,5 @@
 // Google Sheets API Integration
-export const SPREADSHEET_ID = "1kIh7WqHhwO-TKBhKpRto5pXRn8vzBXlyQbg0TONgjOk";
+export const SPREADSHEET_ID = import.meta.env.VITE_SPREADSHEET_ID || "";
 // Sheet range - try without sheet name first (uses first sheet by default)
 // If your sheet has a different name, change this to: "YourSheetName!A:Z"
 export const SHEET_RANGE = "A:Z"; // This will use the first sheet by default

@@ -1,5 +1,5 @@
 // Google OAuth 2.0 Authentication using Google Identity Services
-export const CLIENT_ID = "982479228273-chrjvpnqjktj752qmobu7p8eu1lkhbc7.apps.googleusercontent.com";
+export const CLIENT_ID = import.meta.env.VITE_CLIENT_ID || "";
 
 const OAUTH_SCOPES = [
   'https://www.googleapis.com/auth/spreadsheets.readonly',
