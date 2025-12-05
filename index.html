@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kasatria Table - 3D Visualization</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <!-- Login Section -->
+  <div id="login-section" class="login-container">
+    <div class="login-card">
+      <h1>Welcome Back</h1>
+      <p class="login-subtitle">Lorem ipsum dolor sit amet, consectetuer adipiscing elit</p>
+      <div id="google-signin-button"></div>
+    </div>
+  </div>
+
+  <!-- Main App Section -->
+  <div id="app-section" class="app-container" style="display: none;">
+    <!-- 3D Scene Container -->
+    <div id="container"></div>
+    
+    <!-- Control Bar -->
+    <div class="controls-bar">
+      <button id="btn-table" class="layout-btn active">TABLE</button>
+      <button id="btn-sphere" class="layout-btn">SPHERE</button>
+      <button id="btn-helix" class="layout-btn">HELIX</button>
+      <button id="btn-grid" class="layout-btn">GRID</button>
+      <!-- Color Gradient Bar (matching Image B) -->
+      <div class="color-gradient-bar">
+        <span class="gradient-label">LOW</span>
+        <div class="gradient-line"></div>
+        <span class="gradient-label">High</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
+
