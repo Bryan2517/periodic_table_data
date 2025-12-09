@@ -6,6 +6,7 @@ const LAYOUTS = {
   sphere: { id: 'sphere', buttonId: 'btn-sphere' },
   helix: { id: 'helix', buttonId: 'btn-helix' },
   grid: { id: 'grid', buttonId: 'btn-grid' },
+  tetra: { id: 'tetra', buttonId: 'btn-tetra' },
 };
 
 const TRANSITION_DURATION = 2000; // milliseconds

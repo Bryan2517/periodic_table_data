@@ -24,6 +24,10 @@ export const LAYOUT_CONSTANTS = {
     Y_COUNT: 4,
     Z_COUNT: 10,
   },
+  TETRA: {
+    SCALE: 3.5,           // Overall size of the tetrahedron (pushed outward)
+    NORMAL_OFFSET: 50,   // Push tiles outward along face normals for breathing room
+  },
 };
 
 /**
@@ -37,6 +41,7 @@ export function generateLayoutTargets(count) {
     sphere: generateSphereLayout(count),
     helix: generateHelixLayout(count),
     grid: generateGridLayout(count),
+    tetra: generateTetraLayout(count),
   };
 }
 
@@ -157,6 +162,100 @@ function generateGridLayout(count) {
     target.position.set(posX, posY, posZ);
     target.rotation.set(0, 0, 0);
     targets.push(target);
+  }
+
+  return targets;
+}
+
+/**
+ * Tetrahedron (4-face pyramid) layout
+ * Distributes items evenly across the four faces of a tetrahedron.
+ * @param {number} count - Number of objects
+ * @returns {Array<THREE.Object3D>} Array of target objects
+ */
+function generateTetraLayout(count) {
+  const targets = [];
+  const { SCALE, NORMAL_OFFSET } = LAYOUT_CONSTANTS.TETRA;
+
+  // Define vertices of a tetrahedron (manually tuned for good spacing)
+  const vertices = [
+    new THREE.Vector3(0, 520, 0).multiplyScalar(SCALE),          // Apex
+    new THREE.Vector3(-420, -320, -320).multiplyScalar(SCALE),   // Base vertex 1
+    new THREE.Vector3(420, -320, -320).multiplyScalar(SCALE),    // Base vertex 2
+    new THREE.Vector3(0, -320, 520).multiplyScalar(SCALE),       // Base vertex 3
+  ];
+
+  // Faces defined by indices into the vertices array
+  const faces = [
+    [0, 1, 2],
+    [0, 2, 3],
+    [0, 3, 1],
+    [1, 3, 2],
+  ];
+
+  // Low-discrepancy sampling on triangle using Hammersley sequence for even spacing per face
+  const hammersley = (k, n) => {
+    let t = k;
+    let p = 0;
+    for (let i = 0.5; t > 0; i *= 0.5) {
+      p += (t % 2) * i;
+      t = Math.floor(t / 2);
+    }
+    return [k / n, p];
+  };
+
+  // Distribute items evenly across faces
+  const basePerFace = Math.floor(count / faces.length);
+  const remainder = count % faces.length;
+
+  for (let faceIndex = 0; faceIndex < faces.length; faceIndex++) {
+    const itemsOnFace = basePerFace + (faceIndex < remainder ? 1 : 0);
+    if (itemsOnFace === 0) continue;
+
+    const [aIdx, bIdx, cIdx] = faces[faceIndex];
+    const a = vertices[aIdx];
+    const b = vertices[bIdx];
+    const c = vertices[cIdx];
+
+    const edge1 = new THREE.Vector3().subVectors(b, a);
+    const edge2 = new THREE.Vector3().subVectors(c, a);
+    const tangent1 = edge1.clone().normalize();
+    const tangent2 = edge2.clone().normalize();
+    const normal = new THREE.Vector3().crossVectors(edge1, edge2).normalize();
+    const faceCenter = new THREE.Vector3()
+      .add(a)
+      .add(b)
+      .add(c)
+      .divideScalar(3);
+
+    for (let i = 0; i < itemsOnFace; i++) {
+      const [uRaw, vRaw] = hammersley(i, itemsOnFace);
+      const u = Math.sqrt(uRaw);
+      const v = vRaw * u;
+
+      const weightA = 1 - u;
+      const weightB = u - v;
+      const weightC = v;
+
+      const position = new THREE.Vector3(0, 0, 0)
+        .addScaledVector(a, weightA)
+        .addScaledVector(b, weightB)
+        .addScaledVector(c, weightC);
+
+      // Nudge toward face center to avoid edge clustering, apply slight in-face jitter for separation
+      position.lerp(faceCenter, 0.18);
+      const jitter1 = (uRaw - 0.5) * 30;
+      const jitter2 = (vRaw - 0.5) * 24;
+      position.addScaledVector(tangent1, jitter1);
+      position.addScaledVector(tangent2, jitter2);
+
+      // Push outward along the normal for breathing room
+      const target = new THREE.Object3D();
+      target.position.copy(position).addScaledVector(normal, NORMAL_OFFSET);
+      target.lookAt(position.clone().add(normal));
+
+      targets.push(target);
+    }
   }
 
   return targets;
